@@ -1,4 +1,4 @@
-__version__ = '2023.09.15'
+__version__ = '2023.09.15b'
 __author__ = 'PABLO PILA'
 __author_email__ = "pablogonzalezpila@gmail.com"
 
@@ -17,6 +17,8 @@ setup(
     author_email = __author_email__,
     url = "https://github.com/PaulFilms/battery-tools.git",
     packages = find_packages(),
+    include_package_data = True,
+    long_description = "README.md",
     license = "MIT",
     classifiers = [
         "Intended Audience :: Developers",
