@@ -1,4 +1,4 @@
-__version__ = '2023.09.19b'
+__version__ = '2023.09.20'
 __author__ = 'PABLO PILA'
 __author_email__ = "pablogonzalezpila@gmail.com"
 
