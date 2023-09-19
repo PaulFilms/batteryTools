@@ -1,4 +1,4 @@
-# battery-tools
+# batteryTools
 Toolset for app development, reporting, calc, and instrumentation
 
 # Beta Package
