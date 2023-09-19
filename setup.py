@@ -1,4 +1,4 @@
-__version__ = '2023.09.15b'
+__version__ = '2023.09.19'
 __author__ = 'PABLO PILA'
 __author_email__ = "pablogonzalezpila@gmail.com"
 
@@ -12,12 +12,13 @@ from setuptools import setup, find_packages
 
 setup(
     name = "battery-tools",
+    # packages = find_packages(), # con find_pachages no conseguir hacerlo funcionar
+    packages=["battery-tools"],
+    include_package_data=True, # muy importante para que se incluyan archivos sin extension .py
     version = __version__,
     author = __author__,
     author_email = __author_email__,
     url = "https://github.com/PaulFilms/battery-tools.git",
-    packages = find_packages(),
-    include_package_data = True,
     long_description = "README.md",
     license = "MIT",
     classifiers = [
