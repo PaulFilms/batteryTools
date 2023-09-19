@@ -20,7 +20,7 @@ setup(
     author_email = __author_email__,
     url = "https://github.com/PaulFilms/battery-tools.git",
     long_description = "README.md",
-    license = "MIT",
+    license = "www.unlicense.org",
     classifiers = [
         "Intended Audience :: Developers",
         "Intended Audience :: System Administrators",
