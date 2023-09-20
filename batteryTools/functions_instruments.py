@@ -1,4 +1,4 @@
-__version__ = '2023.09.19'
+__update__ = '2023.09.20'
 __author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
 
 '''
@@ -11,19 +11,18 @@ WARNINGS
 '''
 
 ''' SYSTEM LIBRARIES '''
-from time import sleep
+# from time import sleep
 
 ''' VISA INSTRUMENT
 --------------------------------------------------------  '''
-
-import pyvisa
 
 class VISA_INSTRUMENT:
     '''
     visa_resource: GPIB0::17::INSTR" / USB0::0x0AAD::0x014E::101060::INSTR / PXI1Slot2\n
     timeout (seconds) = 10 seconds default
     '''
-    def __init__(self, visa_resource=str, timeout: int=10):
+    def __init__(self, visa_resource: str, timeout: int = 10):
+        import pyvisa
         RM = pyvisa.ResourceManager()
         RM.list_resources()
         self.DEVICE = RM.open_resource(visa_resource)
@@ -32,7 +31,7 @@ class VISA_INSTRUMENT:
     def CLOSE(self):
         self.DEVICE.close()
     
-    def WR(self, SENTENCE=str):
+    def WR(self, SENTENCE: str):
         '''
         Write
         '''
@@ -47,11 +46,13 @@ class VISA_INSTRUMENT:
             VALUE = float(VALUE)
         return VALUE
 
-    def READ(self):
+    def READ(self, FLOAT: bool = False) -> str | float:
         '''
         Read
         '''
         VALUE = self.DEVICE.read()
+        if FLOAT:
+            VALUE = float(VALUE)
         return VALUE
     
     def OPC(self) -> None:
@@ -62,10 +63,44 @@ class VISA_INSTRUMENT:
         self.DEVICE.read()
 
 
+''' RS232 INSTRUMENT
+--------------------------------------------------------  '''
+
+class RS232_INSTRUMENT:
+    '''
+    INCOMPLETE:
+        - Not tested yet 
+    '''
+    def __init__(self, port: str = "COM1", baudrate: int = 9600, timeout: float = 1) -> None:
+        import serial
+        self.DEVICE = serial.Serial(port, baudrate, timeout)
+
+    def CLOSE(self):
+        self.DEVICE.close()
+
+    def WR(self, SENTENCE: str):
+        '''
+        Write
+        '''
+        bytes_value = SENTENCE.encode('utf-8')
+        self.DEVICE.write(bytes_value)
+
+    def RD(self, SENTENCE: str, FLOAT: bool = False) -> str | float:
+        '''
+        Query
+        '''
+        bytes_value = SENTENCE.encode('utf-8')
+        self.DEVICE.write(bytes_value)
+        VALUE = self.DEVICE.readline().decode('utf-8')
+        if FLOAT:
+            VALUE = float(VALUE)
+        return VALUE
 
 
 ''' PXI INSTRUMENT
---------------------------------------------------------  
+--------------------------------------------------------  '''
+
+''' NI MODULES
 NI-DCPower (Python module: nidcpower)
 NI-Digital Pattern Driver (Python module: nidigital)
 NI-DMM (Python module: nidmm)
@@ -77,8 +112,6 @@ NI-SWITCH (Python module: niswitch)
 NI-TClk (Python module: nitclk)
 '''
 
-import nidmm
-
 class PXI_DMM:
     '''
     INCOMPLETE:
@@ -89,6 +122,7 @@ class PXI_DMM:
     - Añadir espera o indicación al terminar el self test y el self cal
     '''
     def __init__(self, resource: str = ""):
+        import nidmm
         self.session = nidmm.Session(resource)
         self.NMB_FUNCTIONS: tuple = (
             self.MEAS,
@@ -300,13 +334,12 @@ class PXI_DMM:
                 resolution_digits= float(digits_value)
                 )
 
-import nidcpower
-
 class PXI_DCPOWER:
     '''
     INCOMPLETE
     '''
     def __init__(self, resource: str = ""):
+        import nidcpower
         self.session = nidcpower.Session(resource)
     
     def CLOSE(self) -> None:
@@ -322,15 +355,60 @@ class PXI_DCPOWER:
         idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
         return idn
 
+class NI_VBENCH:
+    '''
+    INCOMPLETE
+    '''
+    def __init__(self, resource: str):
+        from pyvirtualbench import PyVirtualBench, PyVirtualBenchException, Waveform
+        self.virtualbench = PyVirtualBench(resource)
+        self.fgen = self.virtualbench.acquire_function_generator()
+
+    def DEVICE_INFO(self) -> str:
+        '''
+        INCOMPLETE
+        '''
+        MANUFACTURER = "NATIONAL INSTRUMENTS"
+        MODEL = self.virtualbench.device_name
+        SERIAL_NUMBER = ""
+        idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
+        return idn
+
+    # def FGEN_ONOFF(self):
+    #     self.fgen.run()
+    #     self.fgen.
+
+    def FGEN_SETUP(self,
+                waveform_function: str,
+                frequency: float, # Hz
+                amplitude: float, # Vpp
+                dc_offset: float, # V
+                duty_cycle: float, # %
+                ) -> None:
+        '''
+        waveform_function: DC / SINE / SQUARE / TRIANGLE
+        frequency (Hz) / amplitude (Vpp) / dc_offset (V) / duty_cycle (%)
+        '''
+        if waveform_function == "DC":
+            waveForm = Waveform.DC
+        if waveform_function == "SINE":
+            waveForm = Waveform.SINE
+        if waveform_function == "SQUARE":
+            waveForm = Waveform.SQUARE
+        if waveform_function == "TRIANGLE":
+            waveForm = Waveform.TRIANGLE
+        self.fgen.configure_standard_waveform(waveForm, amplitude, dc_offset, frequency, duty_cycle)
+
 
 ''' SPECIAL INSTRUMENT
 --------------------------------------------------------  '''
 
 class FLKE_5XXX(VISA_INSTRUMENT):
     '''
-    NEW
     Especial functions for the device:
-    FLUKE - 5XXX series
+        - TYPE: CALIBRATOR
+        - MANUFACTURER: FLUKE
+        - MODEL: 5xxx
     '''
     def __init__(self, visa_resource=str, timeout: int = 10):
         super().__init__(visa_resource, timeout)
@@ -342,9 +420,12 @@ class FLKE_5XXX(VISA_INSTRUMENT):
             self.MODEL = "5700"
         if MODEL[0:2] == "55":
             self.MODEL = "5500"
+        
+        ## NMBv3 FUNCTIONS
         self.NMB_FUNCTIONS: tuple = (
             self.OPER,
             self.STBY,
+            self.OUT_VPP,
             self.FOUR_WIRES
         )
     
@@ -378,61 +459,55 @@ class FLKE_5XXX(VISA_INSTRUMENT):
         self.WR("STBY")
         self.OPC()
 
-    def FOUR_WIRES(self, VALUE: str, UNIT: str) -> None:
+    def OUT_VPP(self, *args):
+        pass
+
+    def FOUR_WIRES(self, *args) -> None:
+        pass
+
+class RS_SM(VISA_INSTRUMENT):
+    '''
+    Especial functions for the device:
+        - TYPE: SIGNAL GENERATOR
+        - MANUFACTURER: ROHDE & SCHWARZ
+        - MODEL: SMx
+    '''
+    def __init__(self, visa_resource: str, timeout: int = 10):
+        super().__init__(visa_resource, timeout)
+        
+        ## NMBv3 FUNCTIONS
+        self.NMB_FUNCTIONS: tuple = (
+            self.STBY,
+            self.NRP_MEAS,
+            self.NRP_ALC
+        )
+    
+    def STBY(self, *args):
+        self.WR("*CLS")
+        self.WR("ESE 1")
+        self.WR("SRE 32")
+        self.WR("SOUR:POW -100 DBM")
+        self.WR("OUTP:STAT OFF")
+        self.OPC()
+    
+    def NRP_MEAS(self, *args):
+        '''
+        '''
+        pass
+
+    def NRP_ALC(self, *args):
+        '''
+        Set Power Level to Target Level in NRP
+        ** Make sure the generator has a NRP connected and is identified as 1
+        INCOMPLETE:
+        '''
+        # Chekear la sonda
+        # Revisar el modelo
+        # En caso de fallo llamar STBY
         pass
 
 SPECIAL_INSTRUMENTS: tuple = (FLKE_5XXX, PXI_DMM)
 
+
 ''' TEST
 --------------------------------------------------------  '''
-
-# import serial ## RS-232 Instruments
-
-# class RS232_INSTRUMENT:
-#     def __init__(self) -> None:
-#         pass
-
-# from pyvirtualbench import PyVirtualBench, PyVirtualBenchException, Waveform
-
-# class NI_VBENCH:
-#     '''
-#     INCOMPLETE
-#     '''
-#     def __init__(self, resource: str):
-#         self.virtualbench = PyVirtualBench(resource)
-#         self.fgen = self.virtualbench.acquire_function_generator()
-
-#     def DEVICE_INFO(self) -> str:
-#         '''
-#         INCOMPLETE
-#         '''
-#         MANUFACTURER = "NATIONAL INSTRUMENTS"
-#         MODEL = self.virtualbench.device_name
-#         SERIAL_NUMBER = ""
-#         idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
-#         return idn
-
-#     # def FGEN_ONOFF(self):
-#     #     self.fgen.run()
-#     #     self.fgen.
-
-#     def FGEN_SETUP(self,
-#                 waveform_function: str,
-#                 frequency: float, # Hz
-#                 amplitude: float, # Vpp
-#                 dc_offset: float, # V
-#                 duty_cycle: float, # %
-#                 ) -> None:
-#         '''
-#         waveform_function: DC / SINE / SQUARE / TRIANGLE
-#         frequency (Hz) / amplitude (Vpp) / dc_offset (V) / duty_cycle (%)
-#         '''
-#         if waveform_function == "DC":
-#             waveForm = Waveform.DC
-#         if waveform_function == "SINE":
-#             waveForm = Waveform.SINE
-#         if waveform_function == "SQUARE":
-#             waveForm = Waveform.SQUARE
-#         if waveform_function == "TRIANGLE":
-#             waveForm = Waveform.TRIANGLE
-#         self.fgen.configure_standard_waveform(waveForm, amplitude, dc_offset, frequency, duty_cycle)

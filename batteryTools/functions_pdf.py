@@ -6,11 +6,11 @@ NOTES:
 	Creación de documentos PDF sencillos en A4 (de momento)
 	Texto enriquecido
 TASK:
-	Añadir la posiblidad de usar otro tipo de tamaños de papel
-	Añadir control de linea a todos las las funciones
-	Añadir cuenta automática de páginas
+	- Añadir la posiblidad de usar otro tipo de tamaños de papel
+	- Añadir control de linea a todos las las funciones
+	- Añadir cuenta automática de páginas
 WARNINGS:
-	Borrar funciones de Test
+	- Borrar funciones de Test
 '''
 
 ''' SYSTEM LIBRARIES '''
@@ -34,14 +34,18 @@ from reportlab.lib.utils import ImageReader
 @dataclass
 class fontTypes(str):
 	'''
+	DataClass to define Font Types in text format
 	'''
-	normal = "Normal"
-	bold = "Bold"
-	italic = "Italic"
-	bold_italic = "Bold_Italic"
+	normal: str = "Normal"
+	bold: str = "Bold"
+	italic: str = "Italic"
+	bold_italic: str = "Bold_Italic"
 
 @dataclass
 class richText():
+	'''
+	DataClass for defining the content and formatting of a text string
+	'''
 	value: str = ""
 	font: fontTypes = fontTypes.normal
 	size: float = 8
@@ -52,10 +56,12 @@ class PDFREPORT:
 	Un A-4 a 72 ppp    595 x 842
 	Default Font: Arial
 	'''
-	def __init__(self, filePath, docTitle:str="", defaultFont=fontTypes.normal, defaultSize=8, defaulColor=colors.black):
+	def __init__(self, filePath, docTitle: str, defaultFont=fontTypes.normal, defaultSize=8, defaulColor=colors.black):
 		self.filePath = filePath
 		self.PDF = canvas.Canvas(self.filePath + ".pdf")
-		if docTitle != "":
+
+		## DOCUMENT NAME
+		if docTitle:
 			self.PDF.setTitle(docTitle)
 		else:
 			self.PDF.setTitle("REPORT")
@@ -115,15 +121,16 @@ class PDFREPORT:
 		self.row -= (self.PDF._fontsize + self.spacing)
 	
 	def WR_MULTILINE(self):
+		'''
+		INCOMPLETE
+		'''
 		# text = self.PDF.beginText(40, 680)
 		# text.setFont("Courier", 18)
 		# text.setFillColor(colors.red)
 		# for line in textLines:
 		# 	text.textLine(line)
 		# self.PDF.drawText(text)
-		'''
-		INCOMPLETE
-		'''
+		pass
 
 	def WR_HEADER(self, x=int, y=int, TXT=str, filling=None, fontType=fontTypes.bold, size=15):
 		'''
@@ -216,7 +223,8 @@ class PDFREPORT:
 
 	def SET_COLOR(self, color=colors, rgb=tuple):
 		'''
-		INCOMPLETE
+		INCOMPLETE:
+			- Hay que crear un dataclass con el color
 		'''
 		# if color == "black": self.PDF.setFillColorRGB(0, 0, 0)
 		# if color == "blue": self.PDF.setFillColorRGB(0, 0, 255)
