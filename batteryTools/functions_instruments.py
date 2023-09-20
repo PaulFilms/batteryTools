@@ -26,7 +26,7 @@ class VISA_INSTRUMENT:
     def __init__(self, visa_resource=str, timeout: int=10):
         RM = pyvisa.ResourceManager()
         RM.list_resources()
-        self.DEVICE = self.RM.open_resource(visa_resource)
+        self.DEVICE = RM.open_resource(visa_resource)
         self.DEVICE.timeout = timeout * 1000 # miliseconds
     
     def CLOSE(self):
@@ -53,20 +53,29 @@ class VISA_INSTRUMENT:
         '''
         VALUE = self.DEVICE.read()
         return VALUE
+    
+    def OPC(self) -> None:
+        self.DEVICE.write("*CLS")
+        self.DEVICE.write("ESE 1")
+        self.DEVICE.write("SRE 32")
+        self.DEVICE.write("*OPC?")
+        self.DEVICE.read()
+
+
 
 
 ''' PXI INSTRUMENT
---------------------------------------------------------  '''
-
-# NI-DCPower (Python module: nidcpower)
-# NI-Digital Pattern Driver (Python module: nidigital)
-# NI-DMM (Python module: nidmm)
-# NI-FGEN (Python module: nifgen)
-# NI-ModInst (Python module: nimodinst)
-# NI-SCOPE (Python module: niscope)
-# NI Switch Executive (Python module: nise)
-# NI-SWITCH (Python module: niswitch)
-# NI-TClk (Python module: nitclk)
+--------------------------------------------------------  
+NI-DCPower (Python module: nidcpower)
+NI-Digital Pattern Driver (Python module: nidigital)
+NI-DMM (Python module: nidmm)
+NI-FGEN (Python module: nifgen)
+NI-ModInst (Python module: nimodinst)
+NI-SCOPE (Python module: niscope)
+NI Switch Executive (Python module: nise)
+NI-SWITCH (Python module: niswitch)
+NI-TClk (Python module: nitclk)
+'''
 
 import nidmm
 
@@ -122,8 +131,7 @@ class PXI_DMM:
         config = f"{FUNCTION}, {RANGE}, {DIGITS}"
         return config
 
-    def MEAS(self, VALUE, UNIT) -> float:
-        VALUE = None; UNIT = None
+    def MEAS(self, *args) -> float:
         measure = self.session.read()
         try:
             measure = float(measure)
@@ -132,129 +140,172 @@ class PXI_DMM:
             print("MEAS ERROR / Float value")
             return 0.0  
 
-    def CONFIG_VDC(self, VALUE: str = -1, UNIT: str = 6.5) -> None:
-        if VALUE == None or VALUE == "":
-            range_value = -1
-        else:
-            range_value = VALUE
-        if UNIT == None or UNIT == "":
-            unit_value = -1
-        else:
-            unit_value = UNIT
+    def CONFIG_VDC(self, *args) -> None:
+        '''
+        '''
+        ## RANGE
+        if len(args) > 0 and args[0] and args[0] != "": 
+            range_value = float(args[0])
+        else: 
+            range_value: float = -1
+        ## DIGITS
+        if len(args) > 1 and args[1] and args[1] != "": 
+            digits_value = float(args[0])
+        else: 
+            digits_value: float = 6.5
+        ## CONFIG
         self.session.configure_measurement_digits(
                 measurement_function=nidmm.Function.DC_VOLTS,
                 range = float(range_value),
-                resolution_digits= float(unit_value)
+                resolution_digits= float(digits_value)
                 )
     
-    def CONFIG_VAC(self, VALUE: str = -1, UNIT: str = 6.5) -> None:
-        if VALUE == None or VALUE == "":
-            range_value = -1
-        else:
-            range_value = VALUE
-        if UNIT == None or UNIT == "":
-            unit_value = -1
-        else:
-            unit_value = UNIT
+    def CONFIG_VAC(self, *args) -> None:
+        '''
+        '''
+        ## RANGE
+        if len(args) > 0 and args[0] and args[0] != "": 
+            range_value = float(args[0])
+        else: 
+            range_value: float = -1
+        ## DIGITS
+        if len(args) > 1 and args[1] and args[1] != "": 
+            digits_value = float(args[0])
+        else: 
+            digits_value: float = 6.5
+        ## CONFIG
         self.session.configure_measurement_digits(
                 measurement_function=nidmm.Function.AC_VOLTS,
                 range = float(range_value),
-                resolution_digits= float(unit_value)
+                resolution_digits= float(digits_value)
                 )
     
-    def CONFIG_RES_2W(self, VALUE: str = -1, UNIT: str = 6.5) -> None:
-        if VALUE == None or VALUE == "":
-            range_value = -1
-        else:
-            range_value = VALUE
-        if UNIT == None or UNIT == "":
-            unit_value = -1
-        else:
-            unit_value = UNIT
+    def CONFIG_RES_2W(self, *args) -> None:
+        '''
+        '''
+        ## RANGE
+        if len(args) > 0 and args[0] and args[0] != "": 
+            range_value = float(args[0])
+        else: 
+            range_value: float = -1
+        ## DIGITS
+        if len(args) > 1 and args[1] and args[1] != "": 
+            digits_value = float(args[0])
+        else: 
+            digits_value: float = 6.5
+        ## CONFIG
         self.session.configure_measurement_digits(
                 measurement_function=nidmm.Function.TWO_WIRE_RES,
                 range = float(range_value),
-                resolution_digits= float(unit_value)
+                resolution_digits= float(digits_value)
                 )
 
-    def CONFIG_RES_4W(self, VALUE: str = -1, UNIT: str = 6.5) -> None:
-        if VALUE == None or VALUE == "":
-            range_value = -1
-        else:
-            range_value = VALUE
-        if UNIT == None or UNIT == "":
-            unit_value = -1
-        else:
-            unit_value = UNIT
+    def CONFIG_RES_4W(self, *args) -> None:
+        '''
+        '''
+        ## RANGE
+        if len(args) > 0 and args[0] and args[0] != "": 
+            range_value = float(args[0])
+        else: 
+            range_value: float = -1
+        ## DIGITS
+        if len(args) > 1 and args[1] and args[1] != "": 
+            digits_value = float(args[0])
+        else: 
+            digits_value: float = 6.5
+        ## CONFIG
         self.session.configure_measurement_digits(
                 measurement_function=nidmm.Function.FOUR_WIRE_RES,
                 range = float(range_value),
-                resolution_digits= float(unit_value)
+                resolution_digits= float(digits_value)
                 )
 
-    def CONFIG_IDC(self, VALUE: str = -1, UNIT: str = 6.5) -> None:
-        if VALUE == None or VALUE == "":
-            range_value = -1
-        else:
-            range_value = VALUE
-        if UNIT == None or UNIT == "":
-            unit_value = -1
-        else:
-            unit_value = UNIT
+    def CONFIG_IDC(self, *args) -> None:
+        '''
+        '''
+        ## RANGE
+        if len(args) > 0 and args[0] and args[0] != "": 
+            range_value = float(args[0])
+        else: 
+            range_value: float = -1
+        ## DIGITS
+        if len(args) > 1 and args[1] and args[1] != "": 
+            digits_value = float(args[0])
+        else: 
+            digits_value: float = 6.5
+        ## CONFIG
         self.session.configure_measurement_digits(
                 measurement_function=nidmm.Function.DC_CURRENT,
                 range = float(range_value),
-                resolution_digits= float(unit_value)
+                resolution_digits= float(digits_value)
                 )
 
-    def CONFIG_IAC(self, VALUE: str = -1, UNIT: str = 6.5) -> None:
-        if VALUE == None or VALUE == "":
-            range_value = -1
-        else:
-            range_value = VALUE
-        if UNIT == None or UNIT == "":
-            unit_value = -1
-        else:
-            unit_value = UNIT
+    def CONFIG_IAC(self, *args) -> None:
+        '''
+        '''
+        ## RANGE
+        if len(args) > 0 and args[0] and args[0] != "": 
+            range_value = float(args[0])
+        else: 
+            range_value: float = -1
+        ## DIGITS
+        if len(args) > 1 and args[1] and args[1] != "": 
+            digits_value = float(args[0])
+        else: 
+            digits_value: float = 6.5
+        ## CONFIG
         self.session.configure_measurement_digits(
                 measurement_function=nidmm.Function.AC_CURRENT,
                 range = float(range_value),
-                resolution_digits= float(unit_value)
+                resolution_digits= float(digits_value)
                 )
 
-    def CONFIG_FREQ(self, VALUE: str = -1, UNIT: str = 6.5) -> None:
-        if VALUE == None or VALUE == "":
-            range_value = -1
-        else:
-            range_value = VALUE
-        if UNIT == None or UNIT == "":
-            unit_value = -1
-        else:
-            unit_value = UNIT
+    def CONFIG_FREQ(self, *args) -> None:
+        '''
+        '''
+        ## RANGE
+        if len(args) > 0 and args[0] and args[0] != "": 
+            range_value = float(args[0])
+        else: 
+            range_value: float = -1
+        ## DIGITS
+        if len(args) > 1 and args[1] and args[1] != "": 
+            digits_value = float(args[0])
+        else: 
+            digits_value: float = 6.5
+        ## CONFIG
         self.session.configure_measurement_digits(
                 measurement_function=nidmm.Function.FREQ,
                 range = float(range_value),
-                resolution_digits= float(unit_value)
+                resolution_digits= float(digits_value)
                 )
 
-    def CONFIG_TEMP(self, VALUE: str = -1, UNIT: str = 6.5) -> None:
-        if VALUE == None or VALUE == "":
-            range_value = -1
-        else:
-            range_value = VALUE
-        if UNIT == None or UNIT == "":
-            unit_value = -1
-        else:
-            unit_value = UNIT
+    def CONFIG_TEMP(self, *args) -> None:
+        '''
+        '''
+        ## RANGE
+        if len(args) > 0 and args[0] and args[0] != "": 
+            range_value = float(args[0])
+        else: 
+            range_value: float = -1
+        ## DIGITS
+        if len(args) > 1 and args[1] and args[1] != "": 
+            digits_value = float(args[0])
+        else: 
+            digits_value: float = 6.5
+        ## CONFIG
         self.session.configure_measurement_digits(
                 measurement_function=nidmm.Function.TEMPERATURE,
                 range = float(range_value),
-                resolution_digits= float(unit_value)
+                resolution_digits= float(digits_value)
                 )
 
 import nidcpower
 
 class PXI_DCPOWER:
+    '''
+    INCOMPLETE
+    '''
     def __init__(self, resource: str = ""):
         self.session = nidcpower.Session(resource)
     
@@ -277,6 +328,7 @@ class PXI_DCPOWER:
 
 class FLKE_5XXX(VISA_INSTRUMENT):
     '''
+    NEW
     Especial functions for the device:
     FLUKE - 5XXX series
     '''
@@ -308,29 +360,26 @@ class FLKE_5XXX(VISA_INSTRUMENT):
     
     def OPER(self, VALUE: str, UNIT: str) -> None:
         '''
-        INCOMPLETE:
-            - Is necessary check the "U" Indication to stabilize
         '''
         self.WR("*CLS")
+        self.WR("ESE 1")
+        self.WR("SRE 32")
         self.WR("OPER")
-        self.WR("*WAI")
-        result = self.RD("*OPC?")
-        while result != "1":
-            result = self.RD("*OPC?")
-            sleep(1)
-    
-    def STBY(self, VALUE: str, UNIT: str) -> None:
+        self.OPC()
+
+    def STBY(self, *args) -> None:
         '''
         '''
         self.WR("*CLS")
+        self.WR("ESE 1")
+        self.WR("SRE 32")
         self.WR("OUT 0 HZ")
         self.WR("OUT 0 V")
         self.WR("STBY")
-        self.WR("*WAI")
+        self.OPC()
 
     def FOUR_WIRES(self, VALUE: str, UNIT: str) -> None:
         pass
-
 
 SPECIAL_INSTRUMENTS: tuple = (FLKE_5XXX, PXI_DMM)
 
