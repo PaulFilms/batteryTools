@@ -1,7 +1,4 @@
-__update__ = '2023.09.20'
-__author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
-
-'''
+r'''
 NOTES:
     -
 TASK:
@@ -9,6 +6,9 @@ TASK:
 WARNINGS
     - al usar "sleep" crashea desde una app con PyQt, estar atento (19.09.2023)
 '''
+
+__update__ = '2023.09.20'
+__author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
 
 ''' SYSTEM LIBRARIES '''
 from dataclasses import dataclass

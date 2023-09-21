@@ -1,11 +1,12 @@
-__update__ = '2023.09.21'
-__author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
-
-'''
+r'''
 NOTES:
+    System functions
 TASK:
 WARNINGS:
 '''
+
+__update__ = '2023.09.21'
+__author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
 
 ''' SYSTEM LIBRARIES '''
 import os, datetime, platform, time
@@ -406,3 +407,6 @@ def OPEN_DIRECTORY(PATH=str) -> None:
     '''
     path = os.path.realpath(PATH)
     os.system(f'start {path}')
+
+pass
+

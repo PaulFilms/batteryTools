@@ -1,7 +1,4 @@
-__update__ = '2023.09.19'
-__author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
-
-''' 
+r''' 
 NOTES:
 	Creación de documentos PDF sencillos en A4 (de momento)
 	Texto enriquecido
@@ -12,6 +9,9 @@ TASK:
 WARNINGS:
 	- Borrar funciones de Test
 '''
+
+__update__ = '2023.09.19'
+__author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
 
 ''' SYSTEM LIBRARIES '''
 from dataclasses import dataclass
