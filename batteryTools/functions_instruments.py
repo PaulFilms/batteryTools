@@ -11,6 +11,7 @@ WARNINGS
 '''
 
 ''' SYSTEM LIBRARIES '''
+from dataclasses import dataclass
 # from time import sleep
 
 ''' VISA INSTRUMENT
@@ -403,6 +404,14 @@ class NI_VBENCH:
 ''' SPECIAL INSTRUMENT
 --------------------------------------------------------  '''
 
+# SPECIAL_INSTRUMENTS: tuple = (FLKE_5XXX, PXI_DMM)
+
+@dataclass
+class SPECIAL_INSTRUMENTS:
+    FLKE_5XXX = FLKE_5XXX
+    RS_SM = RS_SM
+    PXI_DMM = PXI_DMM
+
 class FLKE_5XXX(VISA_INSTRUMENT):
     '''
     Especial functions for the device:
@@ -505,8 +514,6 @@ class RS_SM(VISA_INSTRUMENT):
         # Revisar el modelo
         # En caso de fallo llamar STBY
         pass
-
-SPECIAL_INSTRUMENTS: tuple = (FLKE_5XXX, PXI_DMM)
 
 
 ''' TEST
