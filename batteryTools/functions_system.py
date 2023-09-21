@@ -1,4 +1,4 @@
-__update__ = '2023.08.16'
+__update__ = '2023.09.21'
 __author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
 
 '''
@@ -13,6 +13,7 @@ import hashlib
 import urllib.request # INTERNET CONNECTION
 import pyperclip as clipboard # Portapapeles
 from inspect import getmembers, isfunction, isclass # OBJECTS CHECK
+from dataclasses import dataclass, fields, MISSING
 # from importlib import import_module
 
 
@@ -65,7 +66,6 @@ def INTERNET_CONNECTION_CHECK(URL=r'https://cloud.seatable.cn/') -> bool:
         return True
     except:
         return False
-
 
 
 ## PATH FUNCTIONS
@@ -377,6 +377,21 @@ def INT_TWODIGITS(INT=int) -> str:
     ORDR = '{:02d}'.format(INT)
     return ORDR
 
+def dataClass_to_dict(DATACLASS: dataclass) -> dict:
+    '''
+    Get a dictionary from a dataclass
+    '''
+    DICT = dict()
+    for field in fields(DATACLASS):
+        FIELD = field.name
+        TYPE = field.type
+        DEFAULT = field.default
+        if DEFAULT == MISSING:
+            DICT[FIELD] = TYPE
+        else:
+            DICT[FIELD] = DEFAULT
+    return DICT
+
 
 
 ''' TEST
@@ -391,4 +406,3 @@ def OPEN_DIRECTORY(PATH=str) -> None:
     '''
     path = os.path.realpath(PATH)
     os.system(f'start {path}')
-
