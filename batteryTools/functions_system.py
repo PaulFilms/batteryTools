@@ -45,7 +45,7 @@ def OS_GET_LOGIN() -> str:
     value = os.getlogin()
     return value
 
-def COPY2CLIPBOARD(TEXT) -> None:
+def COPY2CLIPBOARD(TEXT: str) -> None:
     '''
     Add selected data to clipboard
     '''
@@ -104,17 +104,16 @@ def PATH_EXIST_CHECK(PATH=str) -> bool:
     return check
 
 
-
 ## DATE FUNCTIONS
 
-def DATE_GET_TODAY():
+def DATE_GET_TODAY() -> str:
     '''
     Returns Date in str format like ' yyyy-mm-dd '
     '''
     DATE = datetime.datetime.now().strftime('%Y-%m-%d')
     return DATE
 
-def DATE_GET_NOW(format=r'%Y-%m-%d / %H:%M'):
+def DATE_GET_NOW(format=r'%Y-%m-%d / %H:%M') -> str:
     '''
     Returns Date Time in str (default) format like 'yyyy-mm-dd / hh:mm'
     '''
@@ -129,14 +128,13 @@ def DATE_ISO(DATE) -> str:
     return iso_date
 
 
-
 ## LICENSE FUNCTIONS
 
 def ENCODE_STR(STR: str) -> str:
     code = hashlib.sha256(str(STR).encode('utf-8')).hexdigest()
     return code
 
-def LICENSE_TXT(file, appName: str, loginId: str, limitOpens: int, limitDate: int):
+def LICENSE_TXT(file, appName: str, loginId: str, limitOpens: int, limitDate: int) -> None:
     '''
     Make a LICENSE FILE with the next atributes:
     - file (str) / Address and name of the file
@@ -264,7 +262,7 @@ def LICENSE_TXT_CHECK(file, appName: str) -> bool:
             hash = hashlib.sha256(hash.encode('utf-8')).hexdigest()
             if hash == txt[2].replace(chr(10), ""):
                 opens = i
-                print("limitOpens: PASS", opens)
+                # print("limitOpens: PASS", opens)
                 break
             if i == 1999:
                 # print("ERROR / limitOpens")
@@ -326,7 +324,6 @@ def LICENSE_TXT_CHECK(file, appName: str) -> bool:
         return False
 
 
-
 ## IMAGES FUNCTIONS
 
 def IMG_PIXEL2CM(PIXELS=float) -> float:
@@ -342,7 +339,6 @@ def IMG_CM2PIXEL(CM=float) -> float:
     '''
     value = CM * 37.795275591
     return value
-
 
 
 ## MISCELLANEOUS FUNCTIONS
@@ -370,7 +366,7 @@ def OBJECT_CHECK(OBJECT, objectType: str = 'function', onlyNames: bool = False) 
         LIST = [func[0] for func in LIST]
     return LIST
 
-def INT_TWODIGITS(INT=int) -> str:
+def INT_TWODIGITS(INT: int) -> str:
     '''
     Convert Integer to tow digit string
     1 --> 01
@@ -394,7 +390,6 @@ def dataClass_to_dict(DATACLASS: dataclass) -> dict:
     return DICT
 
 
-
 ''' TEST
 --------------------------------------------------------
 '''
@@ -407,6 +402,3 @@ def OPEN_DIRECTORY(PATH=str) -> None:
     '''
     path = os.path.realpath(PATH)
     os.system(f'start {path}')
-
-pass
-
