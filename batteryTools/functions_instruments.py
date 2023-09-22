@@ -12,6 +12,7 @@ __author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
 
 ''' SYSTEM LIBRARIES '''
 from dataclasses import dataclass
+from enum import Enum
 # from time import sleep
 
 ''' VISA INSTRUMENT
@@ -404,14 +405,6 @@ class NI_VBENCH:
 ''' SPECIAL INSTRUMENT
 --------------------------------------------------------  '''
 
-# SPECIAL_INSTRUMENTS: tuple = (FLKE_5XXX, PXI_DMM)
-
-@dataclass
-class SPECIAL_INSTRUMENTS:
-    FLKE_5XXX = FLKE_5XXX
-    RS_SM = RS_SM
-    PXI_DMM = PXI_DMM
-
 class FLKE_5XXX(VISA_INSTRUMENT):
     '''
     Especial functions for the device:
@@ -514,6 +507,11 @@ class RS_SM(VISA_INSTRUMENT):
         # Revisar el modelo
         # En caso de fallo llamar STBY
         pass
+
+class SPECIAL_INSTRUMENTS(Enum):
+    FLKE_5XXX = FLKE_5XXX
+    RS_SM = RS_SM
+    PXI_DMM = PXI_DMM
 
 
 ''' TEST
