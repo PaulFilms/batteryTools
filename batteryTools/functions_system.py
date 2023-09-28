@@ -244,14 +244,18 @@ def LICENSE_TXT_CHECK(file, appName: str) -> bool:
         # 
         app = f"@{appName}"
         app = hashlib.sha256(app.encode('utf-8')).hexdigest()
-        if app == txt[0].replace(chr(10), ""): print("appName: PASS")
+        if app == txt[0].replace(chr(10), ""):
+            # print("appName: PASS")
+            pass
         else:
             # print("ERROR / appName")
             return False
         # 
         login = f"@{os.getlogin()}"
         login = hashlib.sha256(login.encode('utf-8')).hexdigest()
-        if login == txt[1].replace(chr(10), ""): print("loginId: PASS")
+        if login == txt[1].replace(chr(10), ""): 
+            # print("loginId: PASS")
+            pass
         else:
             # print("ERROR / loginId")
             return False
@@ -283,7 +287,9 @@ def LICENSE_TXT_CHECK(file, appName: str) -> bool:
         createTime = time.ctime(createTime)
         createTime = f"@{createTime}"
         createTime = hashlib.sha256(createTime.encode('utf-8')).hexdigest()
-        if createTime == txt[4].replace(chr(10), ""): print("createTime: PASS")
+        if createTime == txt[4].replace(chr(10), ""): 
+            # print("createTime: PASS")
+            pass
         else:
             # print("ERROR / createTime")
             return False
@@ -292,7 +298,9 @@ def LICENSE_TXT_CHECK(file, appName: str) -> bool:
         modTime = time.ctime(modTime)
         modTime = f"@{modTime}"
         modTime = hashlib.sha256(modTime.encode('utf-8')).hexdigest()
-        if modTime == txt[5].replace(chr(10), ""): print("modTime: PASS")
+        if modTime == txt[5].replace(chr(10), ""): 
+            # print("modTime: PASS")
+            pass
         else:
             # print("ERROR / modTime")
             return False
@@ -381,6 +389,7 @@ def dataClass_to_dict(DATACLASS: dataclass) -> dict:
     DICT = dict()
     for field in fields(DATACLASS):
         FIELD = field.name
+        VALUE = field.value
         TYPE = field.type
         DEFAULT = field.default
         if DEFAULT == MISSING:

@@ -123,20 +123,21 @@ class PXI_DMM:
     - Hay que buscar las opciones de NULL
     - Añadir espera o indicación al terminar el self test y el self cal
     '''
+    NMB_FUNCTIONS = [1,2,3,4]
     def __init__(self, resource: str = ""):
         import nidmm
         self.session = nidmm.Session(resource)
-        self.NMB_FUNCTIONS: tuple = (
-            self.MEAS,
-            self.CONFIG_VDC,
-            self.CONFIG_VAC,
-            self.CONFIG_RES_2W,
-            self.CONFIG_RES_4W,
-            self.CONFIG_IDC,
-            self.CONFIG_IAC,
-            self.CONFIG_FREQ,
-            self.CONFIG_TEMP
-        )
+        # self.NMB_FUNCTIONS: tuple = (
+        #     self.MEAS,
+        #     self.CONFIG_VDC,
+        #     self.CONFIG_VAC,
+        #     self.CONFIG_RES_2W,
+        #     self.CONFIG_RES_4W,
+        #     self.CONFIG_IDC,
+        #     self.CONFIG_IAC,
+        #     self.CONFIG_FREQ,
+        #     self.CONFIG_TEMP
+        # )
     
     def CLOSE(self) -> None:
         self.session.close()
