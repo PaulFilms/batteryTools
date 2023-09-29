@@ -3,11 +3,16 @@ NOTES:
     -
 TASK:
     - Implementar la comunicación por RS-232
+    - SPECIAL INSTRUMENTS
+        Fluke 5xxx: esperar a quitar indicador de U, checkear si serie 700 o 500 para funciones especificas
+        HP 34xxx: MEAS, CONFIG
+        HP 3458A: CONFIG, MEAS
+        R&S SM+NRP: ALC control, NRP-Zero, NRP-Meas, 
 WARNINGS
     - al usar "sleep" crashea desde una app con PyQt, estar atento (19.09.2023)
 '''
 
-__update__ = '2023.09.20'
+__update__ = '2023.09.28'
 __author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
 
 ''' SYSTEM LIBRARIES '''
@@ -20,18 +25,28 @@ from enum import Enum
 
 class VISA_INSTRUMENT:
     '''
-    visa_resource: GPIB0::17::INSTR" / USB0::0x0AAD::0x014E::101060::INSTR / PXI1Slot2\n
+    visa_resource: GPIB0::17::INSTR / USB0::0x0AAD::0x014E::101060::INSTR / PXI1Slot2\n
     timeout (seconds) = 10 seconds default
     '''
-    def __init__(self, visa_resource: str, timeout: int = 10):
+    def __init__(self, resource: str, timeout: int = 10):
         import pyvisa
         RM = pyvisa.ResourceManager()
         RM.list_resources()
-        self.DEVICE = RM.open_resource(visa_resource)
+        self.DEVICE = RM.open_resource(resource)
         self.DEVICE.timeout = timeout * 1000 # miliseconds
     
     def CLOSE(self):
         self.DEVICE.close()
+
+    def DEVICE_INFO(self) -> str:
+        self.WR("*CLS")
+        IDN = self.RD("*IDN?; *WAI")
+        IDNL = IDN.split(chr(44))
+        MANUFACTURER = IDNL[0]
+        MODEL = IDNL[1]
+        SERIAL_NUMBER = IDNL[2]
+        idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
+        return idn
     
     def WR(self, SENTENCE: str):
         '''
@@ -413,8 +428,8 @@ class FLKE_5XXX(VISA_INSTRUMENT):
         - MANUFACTURER: FLUKE
         - MODEL: 5xxx
     '''
-    def __init__(self, visa_resource=str, timeout: int = 10):
-        super().__init__(visa_resource, timeout)
+    def __init__(self, resource=str, timeout: int = 10):
+        super().__init__(resource, timeout)
         self.WR("*CLS")
         IDN = self.RD("*IDN?; *WAI")
         MODEL = IDN.split(chr(44))[1]
@@ -432,15 +447,15 @@ class FLKE_5XXX(VISA_INSTRUMENT):
             self.FOUR_WIRES
         )
     
-    def DEVICE_INFO(self) -> str:
-        self.WR("*CLS")
-        IDN = self.RD("*IDN?; *WAI")
-        IDNL = IDN.split(chr(44))
-        MANUFACTURER = IDNL[0]
-        MODEL = IDNL[1]
-        SERIAL_NUMBER = IDNL[2]
-        idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
-        return idn
+    # def DEVICE_INFO(self) -> str:
+    #     self.WR("*CLS")
+    #     IDN = self.RD("*IDN?; *WAI")
+    #     IDNL = IDN.split(chr(44))
+    #     MANUFACTURER = IDNL[0]
+    #     MODEL = IDNL[1]
+    #     SERIAL_NUMBER = IDNL[2]
+    #     idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
+    #     return idn
     
     def OPER(self, VALUE: str, UNIT: str) -> None:
         '''
@@ -475,8 +490,8 @@ class RS_SM(VISA_INSTRUMENT):
         - MANUFACTURER: ROHDE & SCHWARZ
         - MODEL: SMx
     '''
-    def __init__(self, visa_resource: str, timeout: int = 10):
-        super().__init__(visa_resource, timeout)
+    def __init__(self, resource: str, timeout: int = 10):
+        super().__init__(resource, timeout)
         
         ## NMBv3 FUNCTIONS
         self.NMB_FUNCTIONS: tuple = (
