@@ -12,7 +12,7 @@ WARNINGS
     - al usar "sleep" crashea desde una app con PyQt, estar atento (19.09.2023)
 '''
 
-__update__ = '2023.09.28'
+__update__ = '2023.10.04'
 __author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
 
 ''' SYSTEM LIBRARIES '''
@@ -129,6 +129,8 @@ NI-SWITCH (Python module: niswitch)
 NI-TClk (Python module: nitclk)
 '''
 
+import nidmm
+
 class PXI_DMM:
     '''
     INCOMPLETE:
@@ -138,26 +140,31 @@ class PXI_DMM:
     - Hay que buscar las opciones de NULL
     - Añadir espera o indicación al terminar el self test y el self cal
     '''
-    NMB_FUNCTIONS = [1,2,3,4]
+
+    NMB_FUNCTIONS = [
+        'DEVICE_INFO',
+        'SELF_TEST',
+        'SELF_CAL',
+        'MEAS_INFO',
+        'MEAS',
+        'CONFIG_VDC',
+        'CONFIG_VAC',
+        'CONFIG_RES_2W',
+        'CONFIG_RES_4W',
+        'CONFIG_IDC',
+        'CONFIG_IAC',
+        'CONFIG_FREQ',
+        'CONFIG_TEMP'
+        ]
+    
     def __init__(self, resource: str = ""):
         import nidmm
         self.session = nidmm.Session(resource)
-        # self.NMB_FUNCTIONS: tuple = (
-        #     self.MEAS,
-        #     self.CONFIG_VDC,
-        #     self.CONFIG_VAC,
-        #     self.CONFIG_RES_2W,
-        #     self.CONFIG_RES_4W,
-        #     self.CONFIG_IDC,
-        #     self.CONFIG_IAC,
-        #     self.CONFIG_FREQ,
-        #     self.CONFIG_TEMP
-        # )
     
     def CLOSE(self) -> None:
         self.session.close()
 
-    def DEVICE_INFO(self) -> str:
+    def DEVICE_INFO(self, *args) -> str:
         '''
         Get info (Manufacturer, Model, Serial Id) about device
         '''
@@ -167,13 +174,13 @@ class PXI_DMM:
         idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
         return idn
 
-    def SELF_TEST(self) -> None:
+    def SELF_TEST(self, *args) -> None:
         self.session.self_test()
 
-    def SELF_CAL(self) -> None:
+    def SELF_CAL(self, *args) -> None:
         self.session.self_cal()
 
-    def MEAS_INFO(self) -> str:
+    def MEAS_INFO(self, *args) -> str:
         '''
         Get info (Measure Function, Range, Digits) about config
         '''
@@ -428,6 +435,12 @@ class FLKE_5XXX(VISA_INSTRUMENT):
         - MANUFACTURER: FLUKE
         - MODEL: 5xxx
     '''
+
+    NMB_FUNCTIONS = [
+        'OPER',
+        'STBY'
+    ]
+
     def __init__(self, resource=str, timeout: int = 10):
         super().__init__(resource, timeout)
         self.WR("*CLS")
@@ -438,24 +451,16 @@ class FLKE_5XXX(VISA_INSTRUMENT):
             self.MODEL = "5700"
         if MODEL[0:2] == "55":
             self.MODEL = "5500"
-        
-        ## NMBv3 FUNCTIONS
-        self.NMB_FUNCTIONS: tuple = (
-            self.OPER,
-            self.STBY,
-            self.OUT_VPP,
-            self.FOUR_WIRES
-        )
     
-    # def DEVICE_INFO(self) -> str:
-    #     self.WR("*CLS")
-    #     IDN = self.RD("*IDN?; *WAI")
-    #     IDNL = IDN.split(chr(44))
-    #     MANUFACTURER = IDNL[0]
-    #     MODEL = IDNL[1]
-    #     SERIAL_NUMBER = IDNL[2]
-    #     idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
-    #     return idn
+    def DEVICE_INFO(self) -> str:
+        self.WR("*CLS")
+        IDN = self.RD("*IDN?; *WAI")
+        IDNL = IDN.split(chr(44))
+        MANUFACTURER = IDNL[0]
+        MODEL = IDNL[1]
+        SERIAL_NUMBER = IDNL[2]
+        idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
+        return idn
     
     def OPER(self, VALUE: str, UNIT: str) -> None:
         '''
