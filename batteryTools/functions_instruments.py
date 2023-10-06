@@ -361,13 +361,22 @@ class PXI_DMM:
 
 class PXI_DCPOWER:
     '''
-    INCOMPLETE
+    https://nidcpower.readthedocs.io/en/latest/nidcpower.html
     '''
+    
+    NMB_FUNCTIONS = [
+        'DEVICE_INFO',
+    ]
+    
     def __init__(self, resource: str = ""):
+        '''
+        '''
         import nidcpower
         self.session = nidcpower.Session(resource)
     
     def CLOSE(self) -> None:
+        '''
+        '''
         self.session.close()
 
     def DEVICE_INFO(self) -> str:
@@ -379,6 +388,16 @@ class PXI_DCPOWER:
         SERIAL_NUMBER = self.session.serial_number
         idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
         return idn
+
+    def OUTPUT(self, *args) -> None:
+        '''
+        '''
+        output = False
+        if len(args) > 0:
+            if args[0] == True or args[0] == 1 or args[0] == "1":
+                output = True
+        self.session.output_enabled = output
+
 
 class NI_VBENCH:
     '''
@@ -530,8 +549,8 @@ class RS_SM(VISA_INSTRUMENT):
         pass
 
 class SPECIAL_INSTRUMENTS(Enum):
-    FLKE_5XXX = FLKE_5XXX
-    RS_SM = RS_SM
+    # FLKE_5XXX = FLKE_5XXX
+    # RS_SM = RS_SM
     PXI_DMM = PXI_DMM
 
 
