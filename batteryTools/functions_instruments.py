@@ -392,7 +392,7 @@ class PXI_DCPOWER:
     def OUTPUT(self, *args) -> None:
         '''
         '''
-        output = False
+        output: bool = False
         if len(args) > 0:
             if args[0] == True or args[0] == 1 or args[0] == "1":
                 output = True
@@ -549,9 +549,12 @@ class RS_SM(VISA_INSTRUMENT):
         pass
 
 class SPECIAL_INSTRUMENTS(Enum):
+    '''
+    '''
     # FLKE_5XXX = FLKE_5XXX
     # RS_SM = RS_SM
     PXI_DMM = PXI_DMM
+    PXI_DCPOWER = PXI_DCPOWER
 
 
 ''' TEST
