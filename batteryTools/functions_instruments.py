@@ -12,7 +12,7 @@ WARNINGS
     - al usar "sleep" crashea desde una app con PyQt, estar atento (19.09.2023)
 '''
 
-__update__ = '2023.10.04'
+__update__ = '2023.10.10'
 __author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
 
 ''' SYSTEM LIBRARIES '''
@@ -28,14 +28,14 @@ class VISA_INSTRUMENT:
     visa_resource: GPIB0::17::INSTR / USB0::0x0AAD::0x014E::101060::INSTR / PXI1Slot2\n
     timeout (seconds) = 10 seconds default
     '''
-    def __init__(self, resource: str, timeout: int = 10):
+    def __init__(self, resource: str, timeout: int = 10) -> None:
         import pyvisa
         RM = pyvisa.ResourceManager()
         RM.list_resources()
         self.DEVICE = RM.open_resource(resource)
         self.DEVICE.timeout = timeout * 1000 # miliseconds
     
-    def CLOSE(self):
+    def CLOSE(self) -> None:
         self.DEVICE.close()
 
     def DEVICE_INFO(self) -> str:
@@ -48,7 +48,7 @@ class VISA_INSTRUMENT:
         idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
         return idn
     
-    def WR(self, SENTENCE: str):
+    def WR(self, SENTENCE: str) -> None:
         '''
         Write
         '''
@@ -74,8 +74,8 @@ class VISA_INSTRUMENT:
     
     def OPC(self) -> None:
         self.DEVICE.write("*CLS")
-        self.DEVICE.write("ESE 1")
-        self.DEVICE.write("SRE 32")
+        # self.DEVICE.write("ESE 1")
+        # self.DEVICE.write("SRE 32")
         self.DEVICE.write("*OPC?")
         self.DEVICE.read()
 
@@ -366,6 +366,11 @@ class PXI_DCPOWER:
     
     NMB_FUNCTIONS = [
         'DEVICE_INFO',
+        'OUTPUT',
+        'SET_VOLT',
+        'MEAS_VOLT',
+        'SET_CURR',
+        'MEAS_CURR'
     ]
     
     def __init__(self, resource: str = ""):
@@ -373,6 +378,10 @@ class PXI_DCPOWER:
         '''
         import nidcpower
         self.session = nidcpower.Session(resource)
+        self.session.initiate()
+        
+        self.type_voltage = nidcpower.MeasurementTypes.VOLTAGE
+        self.type_current = nidcpower.MeasurementTypes.CURRENT
     
     def CLOSE(self) -> None:
         '''
@@ -391,61 +400,92 @@ class PXI_DCPOWER:
 
     def OUTPUT(self, *args) -> None:
         '''
+        arg1: bool = ON / OFF
         '''
         output: bool = False
         if len(args) > 0:
             if args[0] == True or args[0] == 1 or args[0] == "1":
                 output = True
         self.session.output_enabled = output
-
-
-class NI_VBENCH:
-    '''
-    INCOMPLETE
-    '''
-    def __init__(self, resource: str):
-        from pyvirtualbench import PyVirtualBench, PyVirtualBenchException, Waveform
-        self.virtualbench = PyVirtualBench(resource)
-        self.fgen = self.virtualbench.acquire_function_generator()
-
-    def DEVICE_INFO(self) -> str:
+    
+    def SET_VOLT(self, *args) -> None:
         '''
-        INCOMPLETE
+        arg1: bool = Channel
+        arg2: float = Value (Voltage)
         '''
-        MANUFACTURER = "NATIONAL INSTRUMENTS"
-        MODEL = self.virtualbench.device_name
-        SERIAL_NUMBER = ""
-        idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
-        return idn
-
-    # def FGEN_ONOFF(self):
-    #     self.fgen.run()
-    #     self.fgen.
-
-    def FGEN_SETUP(self,
-                waveform_function: str,
-                frequency: float, # Hz
-                amplitude: float, # Vpp
-                dc_offset: float, # V
-                duty_cycle: float, # %
-                ) -> None:
+        channel: int = args[0]
+        value: float = args[1]
+        self.session.channels[channel].voltage_level = value
+       
+    def MEAS_VOLT(self, *args) -> float:
         '''
-        waveform_function: DC / SINE / SQUARE / TRIANGLE
-        frequency (Hz) / amplitude (Vpp) / dc_offset (V) / duty_cycle (%)
+        arg1: bool = Channel
         '''
-        if waveform_function == "DC":
-            waveForm = Waveform.DC
-        if waveform_function == "SINE":
-            waveForm = Waveform.SINE
-        if waveform_function == "SQUARE":
-            waveForm = Waveform.SQUARE
-        if waveform_function == "TRIANGLE":
-            waveForm = Waveform.TRIANGLE
-        self.fgen.configure_standard_waveform(waveForm, amplitude, dc_offset, frequency, duty_cycle)
+        channel: int = args[0]
+        meas = self.session.channels[channel].measure(self.type_voltage)
+        return meas
 
+    def SET_CURR(self, *args) -> None:
+        '''
+        arg1: bool = Channel
+        arg2: float = Value (Current)
+        '''
+        channel: int = args[0]
+        value: float = args[1]
+        self.session.channels[channel].current_level = value
+
+    def MEAS_CURR(self, *args) -> float:
+        '''
+        arg1: bool = Channel
+        '''
+        channel: int = args[0]
+        meas = self.session.channels[channel].measure(self.type_current)
+        return meas
 
 ''' SPECIAL INSTRUMENT
 --------------------------------------------------------  '''
+
+class HP_344XX(VISA_INSTRUMENT):
+    '''
+    Especial functions for the device:
+        - TYPE: MULTIMETER
+        - MANUFACTURER: HP / AGILENT / KEYSIGHT
+        - MODEL: 344XX
+    '''
+    NMB_FUNCTIONS = [
+        'DEVICE_INFO',
+        'MEAS'
+    ]
+    def __init__(self, resource: str, timeout: int = 10):
+        super().__init__(resource, timeout)
+
+    def DEVICE_INFO(self, *args) -> str:
+        self.WR("*CLS")
+        IDN = self.RD("*IDN?; *WAI")
+        IDNL = IDN.split(chr(44))
+        MANUFACTURER = IDNL[0]
+        MODEL = IDNL[1]
+        SERIAL_NUMBER = IDNL[2]
+        idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
+        return idn
+    
+    def CONFIG(self, *args) -> None:
+        '''
+        '''
+        self.WR()
+    
+    def MEAS(self, *args) -> float:
+        '''
+        '''
+        self.WR('*CLS')
+        self.WR('TRIG:SOUR BUS')
+        self.WR('INIT')
+        self.WR('*TRG')
+        self.OPC()
+        self.WR('FETC?')
+        meas = self.READ()
+        meas = float(meas)
+        return meas
 
 class FLKE_5XXX(VISA_INSTRUMENT):
     '''
@@ -559,3 +599,48 @@ class SPECIAL_INSTRUMENTS(Enum):
 
 ''' TEST
 --------------------------------------------------------  '''
+
+# class NI_VBENCH:
+    # '''
+    # INCOMPLETE
+    # '''
+    # def __init__(self, resource: str):
+        # from pyvirtualbench import PyVirtualBench, PyVirtualBenchException, Waveform
+        # self.virtualbench = PyVirtualBench(resource)
+        # self.fgen = self.virtualbench.acquire_function_generator()
+
+    # def DEVICE_INFO(self) -> str:
+        # '''
+        # INCOMPLETE
+        # '''
+        # MANUFACTURER = "NATIONAL INSTRUMENTS"
+        # MODEL = self.virtualbench.device_name
+        # SERIAL_NUMBER = ""
+        # idn = f"{MANUFACTURER},{MODEL},{SERIAL_NUMBER}"
+        # return idn
+
+    # def FGEN_ONOFF(self):
+        # self.fgen.run()
+        # self.fgen.
+
+    # def FGEN_SETUP(self,
+                # waveform_function: str,
+                # frequency: float, # Hz
+                # amplitude: float, # Vpp
+                # dc_offset: float, # V
+                # duty_cycle: float, # %
+                # ) -> None:
+        # '''
+        # waveform_function: DC / SINE / SQUARE / TRIANGLE
+        # frequency (Hz) / amplitude (Vpp) / dc_offset (V) / duty_cycle (%)
+        # '''
+        # if waveform_function == "DC":
+            # waveForm = Waveform.DC
+        # if waveform_function == "SINE":
+            # waveForm = Waveform.SINE
+        # if waveform_function == "SQUARE":
+            # waveForm = Waveform.SQUARE
+        # if waveform_function == "TRIANGLE":
+            # waveForm = Waveform.TRIANGLE
+        # self.fgen.configure_standard_waveform(waveForm, amplitude, dc_offset, frequency, duty_cycle)
+
