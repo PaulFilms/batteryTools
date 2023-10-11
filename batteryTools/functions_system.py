@@ -1,11 +1,14 @@
 r'''
-NOTES:
-    System functions
+Toolkit with simplified functions and methods for development with Python
+- Operating System
+- Internet
+- Datetime
+
 TASK:
 WARNINGS:
 '''
 
-__update__ = '2023.09.21'
+__update__ = '2023.10.11'
 __author__ = 'PABLO GONZALEZ PILA <pablogonzalezpila@gmail.com>'
 
 ''' SYSTEM LIBRARIES '''
@@ -37,6 +40,13 @@ def OS_GET_SYSTEM() -> str:
     '''
     os = platform.system()
     return os
+
+def OS_GET_MACHINE() -> str:
+    '''
+    Returns the system Device name
+    '''
+    machine = platform.node()
+    return machine
 
 def OS_GET_LOGIN() -> str:
     '''
@@ -382,6 +392,11 @@ def INT_TWODIGITS(INT: int) -> str:
     ORDR = '{:02d}'.format(INT)
     return ORDR
 
+
+''' TEST
+--------------------------------------------------------
+'''
+
 def dataClass_to_dict(DATACLASS: dataclass) -> dict:
     '''
     Get a dictionary from a dataclass
@@ -397,11 +412,6 @@ def dataClass_to_dict(DATACLASS: dataclass) -> dict:
         else:
             DICT[FIELD] = DEFAULT
     return DICT
-
-
-''' TEST
---------------------------------------------------------
-'''
 
 def OPEN_DIRECTORY(PATH=str) -> None:
     '''
